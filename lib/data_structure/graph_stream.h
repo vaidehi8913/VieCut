@@ -32,8 +32,8 @@ public:
     }
 
     virtual ~graph_stream() {
-        delete[] edge_starts;
-        delete[] edge_ends;
+        delete [] edge_starts;
+        delete [] edge_ends;
     }
 
     /* ============================================================= */

@@ -105,9 +105,9 @@ public:
 
                 // only enter edges when the dest node > source node, 
                 // to avoid duplicates
-                if (node_counter < target) {
+                if (node_counter < target - 1) {
                     edge_starts[edge_counter] = node_counter;
-                    edge_ends[edge_counter] = target;
+                    edge_ends[edge_counter] = target - 1;
                     edge_counter++;
                 }
             }
