@@ -46,7 +46,9 @@ int main(int argn, char** argv) {
     }
 
     std::cout << "end of graph" << std::endl;
-   	
+  
+
+// another comment    
 
     /*
     edge_sampler **samplers = new edge_sampler*[nmbNodes];
