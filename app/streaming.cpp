@@ -26,8 +26,15 @@
 int main(int argn, char** argv) {
 
     tlx::CmdlineParser cmdl;
-    cmdl.add_param_string("graph", configuration::getConfig()->graph_filename,
-                          "path to graph file");
+
+    auto cfg = configuration::getConfig();
+
+    cmdl.add_param_string("graph", cfg->graph_filename, "path to graph file");
+
+    if (!cmdl.process(argn, argv)) return -1;
+
+    std::cout << "hello world!" << std::endl;
+    std::cout << "graph file: " << cfg->graph_filename << std::endl;
 
     graph_stream *S = streaming_graph_io::readUnweightedGraph(
         configuration::getConfig()->graph_filename, 
@@ -37,7 +44,7 @@ int main(int argn, char** argv) {
 
     // test run of graph stream
     std::cout << "number of nodes in graph stream: " << nmbNodes << std::endl;
-
+   
     NodeID edge_start;
     NodeID edge_end;
 
@@ -46,11 +53,10 @@ int main(int argn, char** argv) {
     }
 
     std::cout << "end of graph" << std::endl;
-  
-
-// another comment    
 
     /*
+    // actual code
+
     edge_sampler **samplers = new edge_sampler*[nmbNodes];
 
     // initialize the samplers
