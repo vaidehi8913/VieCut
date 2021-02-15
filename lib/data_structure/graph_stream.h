@@ -49,8 +49,8 @@ public:
     void view_edge(NodeID *start, NodeID *end) {
         // should not ever be possible for the edge_pointer 
         // to leave the array
-        &start = edge_starts[edge_pointer];
-        &end = edge_ends[edge_pointer];
+        *start = edge_starts[edge_pointer];
+        *end = edge_ends[edge_pointer];
     }
 
     // move to the next edge in the stream
@@ -83,4 +83,4 @@ public:
     NodeID *edge_starts;
     NodeID *edge_ends;
     EdgeID edge_pointer;
-}
+};

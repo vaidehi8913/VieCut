@@ -20,17 +20,17 @@
 
 #include "common/definitions.h"
 #include "data_structure/graph_stream.h"
-
+#include "tools/string.h"
 
 class streaming_graph_io {
 
 public:
-    graph_io() { }
+    streaming_graph_io() { }
 
-    virtual ~graph_io() { }
+    virtual ~streaming_graph_io() { }
 
     // mostly copied from lib/io/graph_io.h
-    static graph_stream readUnweightedGraph(std::string file, bool scramble_array) {
+    static graph_stream *readUnweightedGraph(std::string file, bool scramble_array) {
 
         std::string line;
 
@@ -96,7 +96,7 @@ public:
                 if (!target) break;
 
                 // check for self-loops
-                if (target - 1 == node) {
+                if (target - 1 == node_counter) {
                     LOG0 << "The graph file contains self-loops. "
                          << "This is not supported. "
                          << "Please remove them from the file. ";
@@ -128,7 +128,7 @@ public:
 
         if (node_counter != (NodeID) nmbNodes) {
             std::cerr << "number of specified nodes mismatch" << std::endl;
-            std::cerr << node_counter << " " < nmbNodes << std::endl;
+            std::cerr << node_counter << " " << nmbNodes << std::endl;
             exit(4);
         }
 
@@ -136,11 +136,27 @@ public:
             // TO DO: scramble the array
         }
 
-        graph_stream S = new graph_stream((NodeID) nmbNodes, (EdgeID) nmbEdges,
+        graph_stream *S = new graph_stream((NodeID) nmbNodes, (EdgeID) nmbEdges,
                                           edge_starts, edge_ends);
 
         return S;
 
     }
 
-}
+    // copied from graph_io 
+    // (there must be a way to make this a child class or something to avoid this copy paste)
+    
+private:
+    // orig. from http://tinodidricksen.com/uploads/code/cpp/speed-string-to-int.cpp
+    static uint64_t fast_atoi(const std::string& str, size_t* line_ptr) {
+	uint64_t x = 0;
+
+	while (str[*line_ptr] >= '0' && str[*line_ptr] <= '9') {
+	    x = (x * 10) + (str[*line_ptr] - '0');
+	    ++(*line_ptr);
+	}
+	++(*line_ptr);
+	return x;
+    }
+
+};

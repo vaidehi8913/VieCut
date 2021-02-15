@@ -36,8 +36,8 @@ public:
     void stream_in(NodeID dest_node) {
         degree++;
 
-        for (int i = 0; i < nmbSamples; i++) {
-            r = random_functions::next_Int(0, degree);
+        for (uint64_t i = 0; i < nmbSamples; i++) {
+            int r = random_functions::nextInt(0, degree);
 
             if (r == 0) {
                 samples[i] = dest_node;
@@ -66,4 +66,4 @@ public:
     uint64_t nmbSamples;
     NodeID *samples;
     NodeID degree;
-}
+};

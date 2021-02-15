@@ -30,24 +30,9 @@ int main(int argn, char** argv) {
                           "path to graph file");
 
     graph_stream *S = streaming_graph_io::readUnweightedGraph(
-        configuration::getConfig()->graph_filename, 
-	false); // do we want to scramble the edges after we read them in?
+        configuration::getConfig()->graph_filename, false);
 
     NodeID nmbNodes = S->number_of_nodes();
-
-    // test run of graph stream
-    std::cout << "number of nodes in graph stream: " << nmbNodes << std::endl;
-
-    NodeID edge_start;
-    NodeID edge_end;
-
-    while (S->next_edge(&edge_start, &edge_end)) {
-	std::cout << "edge: (" << edge_start << ", " << edge_end << ")" << std::endl;
-    }
-
-    std::cout << "end of graph" << std::endl;
-    
-    /*
     edge_sampler **samplers = new edge_sampler*[nmbNodes];
 
     // initialize the samplers
@@ -95,7 +80,7 @@ int main(int argn, char** argv) {
                         return e1.second > e2.second;
                     }
                     
-                    return e1.first > e2.first;
+                    return e1.first > e1.first;
                 });
 
     // throw out duplicates
@@ -158,5 +143,4 @@ int main(int argn, char** argv) {
 
     // delete the samplers
 
-    */
 }
