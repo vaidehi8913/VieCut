@@ -31,31 +31,17 @@ int main(int argn, char** argv) {
 
     cmdl.add_param_string("graph", cfg->graph_filename, "path to graph file");
 
+    cmdl.add_size_t('r', "seed", cfg->seed, "random seed");
+
     if (!cmdl.process(argn, argv)) return -1;
 
-    std::cout << "hello world!" << std::endl;
-    std::cout << "graph file: " << cfg->graph_filename << std::endl;
+    random_functions::setSeed(cfg->seed);
 
     graph_stream *S = streaming_graph_io::readUnweightedGraph(
         configuration::getConfig()->graph_filename, 
 	false); // do we want to scramble the edges after we read them in?
 
     NodeID nmbNodes = S->number_of_nodes();
-
-    // test run of graph stream
-    std::cout << "number of nodes in graph stream: " << nmbNodes << std::endl;
-   
-    NodeID edge_start;
-    NodeID edge_end;
-
-    while (S->next_edge(&edge_start, &edge_end)) {
-	std::cout << "edge: (" << edge_start << ", " << edge_end << ")" << std::endl;
-    }
-
-    std::cout << "end of graph" << std::endl;
-
-    /*
-    // actual code
 
     edge_sampler **samplers = new edge_sampler*[nmbNodes];
 
@@ -69,10 +55,26 @@ int main(int argn, char** argv) {
     NodeID edge_start;
     NodeID edge_end;
 
-    while (S->next_edge(&edge_start, &edge_end)) {
+     while (S->next_edge(&edge_start, &edge_end)) {
+
+	std::cout << "streaming edge: (" << edge_start << ", " << edge_end << ")" << std::endl;
+
         samplers[edge_start]->stream_in(edge_end);
-        samplers[edge_end]->stream_in(edge_start);
+        samplers[edge_end]->stream_in(edge_start); 
     }
+
+    std::cout << std::endl;
+
+
+    // print out the samples for testing purposes
+    std::cout << "SAMPLES:" << std::endl;
+    for (uint64_t i = 0; i < nmbNodes; i++) {
+        auto samples = samplers[i]->get_samples();
+	//we know that there are two samples
+	std::cout << "node " << i << ": [" << 
+    	samples[0] << ", " << samples[1] << "]" << std::endl;
+    }
+    std::cout << std::endl;
 
     // enter node pairs into vector
     // (each edge is entered in both directions for compatibility with the
@@ -98,14 +100,32 @@ int main(int argn, char** argv) {
         }
     }
 
+    // TESTING
+    /*
+    std::cout << "MIN DEGREE NODE: " << min_deg_node << std::endl;
+    std::cout << "MIN DEGREE: " << d_min << std::endl << std::endl;
+
+    std::cout << "SAMPLED EDGES VEC (pre sorting):" << std::endl;
+    for (std::pair<NodeID, NodeID> edge : sampled_edges_vec) {
+	std::cout << "(" << edge.first << ", " << edge.second << ")" << std::endl;
+    }
+    */
+
     std::sort(sampled_edges_vec.begin(), sampled_edges_vec.end(),
                 [](std::pair<NodeID, NodeID> e1, std::pair<NodeID, NodeID> e2) {
                     if (e1.first == e2.first) {
-                        return e1.second > e2.second;
+                        return e1.second < e2.second;
                     }
                     
-                    return e1.first > e2.first;
+                    return e1.first < e2.first;
                 });
+
+    /*
+    std::cout << "SAMPLED EDGES VEC (post sort, pre duplicate removal):" << std::endl;
+    for (std::pair<NodeID, NodeID> edge : sampled_edges_vec) {
+	std::cout << "(" << edge.first << ", " << edge.second << ")" << std::endl;
+    }
+    */
 
     // throw out duplicates
     // (need to do this now so that we know the number of edges to 
@@ -121,12 +141,19 @@ int main(int argn, char** argv) {
         }
     }
 
+    /*
+    std::cout << "SAMPLED EDGES VEC (post duplicate removal):" << std::endl;
+    for (std::pair<NodeID, NodeID> edge : sampled_edges_vec) {
+	std::cout << "(" << edge.first << ", " << edge.second << ")" << std::endl;
+    }
+    */
+
     int nmbSampledEdges = sampled_edges_vec.size();
 
     // initialize graph
     std::shared_ptr<graph_access> subsampled_graph = std::make_shared<graph_access>();
-        // need this to be a shared pointer to use strongly_connected_components.h
-        //graph_access subsampled_graph = new graph_access();
+    // need this to be a shared pointer to use strongly_connected_components.h
+    
     subsampled_graph->start_construction(nmbNodes, nmbSampledEdges);
 
     // enter sampled edges into a graph
@@ -148,16 +175,29 @@ int main(int argn, char** argv) {
     subsampled_graph->finish_construction();
     subsampled_graph->computeDegrees();
 
+    std::cout << "checkpoint 1" << std::endl << std::endl;
+
     // find the connected components of the subsampled graph
     // (example: app/temporal_largest_cc.cpp:49)
     strongly_connected_components scc;
     std::vector<int32_t> components(subsampled_graph->number_of_nodes());
     size_t component_count = scc.strong_components(subsampled_graph, &components);
 
-    // check that number of connected components is not too high
-    if (component_count > (100 * nmbNodes) / d_min) {
-        // some sort of failure behavior should occur here
+    std::cout << "CONNECTED COMPONENTS: " << std::endl;
+    for (uint32_t i = 0; i < subsampled_graph->number_of_nodes(); i++) {
+	std::cout << "node " << i << " in component " << components[i] << std::endl;
     }
+    std::cout << std::endl;
+
+
+    // check that number of connected components is not too high
+    if (component_count == 1) {
+	std::cout << "Failure: only one connected component!" << std::endl << std::endl;
+    } else if (component_count > (100 * nmbNodes) / d_min) {
+	std::cout << "Failure: too many connected components!" << std::endl << std::endl;
+    }
+
+    std::cout << "checkpoint 2" << std::endl << std::endl;
 
     //second pass
     S->new_pass();
@@ -166,6 +206,4 @@ int main(int argn, char** argv) {
 
 
     // delete the samplers
-
-    */
 }

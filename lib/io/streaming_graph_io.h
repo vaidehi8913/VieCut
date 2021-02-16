@@ -93,6 +93,10 @@ public:
 
             while (line_ptr < line.size()) {
                 NodeID target = fast_atoi(line, &line_ptr);
+	
+		// DEBUG	
+		//std::cout << "reading target: " << target << std::endl;
+
                 if (!target) break;
 
                 // check for self-loops
@@ -135,6 +139,18 @@ public:
         if (scramble_array) {
             // TO DO: scramble the array
         }
+
+
+	// DEBUG
+	/*
+	for (int i = 0; i < nmbEdges; i++) {
+	    std::cout << "read edge " << i << ": (" << edge_starts[i] << ", " 
+		    << edge_ends[i] << ")" << std::endl;
+	}
+
+	std::cout << "nmbEdges: " << nmbEdges << std::endl;
+	std::cout << "final edge_counter: " << edge_counter << std::endl;
+	*/
 
         graph_stream *S = new graph_stream((NodeID) nmbNodes, (EdgeID) nmbEdges,
                                           edge_starts, edge_ends);

@@ -24,6 +24,11 @@ public:
         nmbSamples = sample_count;
         samples = new NodeID[nmbSamples];
         degree = 0;
+
+	// initialize memory
+	for (uint64_t i = 0; i < nmbSamples; i++) {
+	    samples[i] = UNDEFINED_NODE;
+	}
     }
 
     virtual ~edge_sampler() {
@@ -34,15 +39,17 @@ public:
     // assume we are seeing an edge between associated_node and 
     // dest_node
     void stream_in(NodeID dest_node) {
-        degree++;
 
         for (uint64_t i = 0; i < nmbSamples; i++) {
             int r = random_functions::nextInt(0, degree);
+	    // the rand bounds are both inclusive
 
             if (r == 0) {
                 samples[i] = dest_node;
             }
         }
+
+	degree++;
     }
 
     NodeID get_associated_node() {

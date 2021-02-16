@@ -46,24 +46,25 @@ public:
 
     // there must be a better way to return the edge info
     // see the edge without advancing the stream
+    // note that this shows what would be the next edge, so to speak
     void view_edge(NodeID *start, NodeID *end) {
         // should not ever be possible for the edge_pointer 
         // to leave the array
-        *start = edge_starts[edge_pointer];
-        *end = edge_ends[edge_pointer];
+        *start = edge_starts[edge_pointer - 1];
+        *end = edge_ends[edge_pointer - 1];
     }
 
     // move to the next edge in the stream
     // return false and last edge again if pointer cannot be updated
     bool next_edge(NodeID *start, NodeID *end) {
-        if (edge_pointer == nmbEdges - 1) {
+        if (edge_pointer == nmbEdges) {
             view_edge(start, end);
             return false;
         }
 
-        edge_pointer++;
+	edge_pointer++;
         view_edge(start, end);
-        return true;
+	return true;
     }
 
     // start a new pass in the same order
