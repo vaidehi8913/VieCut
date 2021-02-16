@@ -35,7 +35,18 @@ int main(int argn, char** argv) {
 
     if (!cmdl.process(argn, argv)) return -1;
 
-    random_functions::setSeed(cfg->seed);
+
+    int fracture_trials = 1000;
+    int fracture_success_tally = 0;
+    int fracture_failure_tally = 0;
+
+    //RUN IT OVER WITH DIFFERENT SEEDS
+    for (size_t seed = 1; seed <= fracture_trials; seed++) {
+
+    std::cout << "seed: " << seed << std::endl;
+
+    //random_functions::setSeed(cfg->seed);
+    random_functions::setSeed(seed);
 
     graph_stream *S = streaming_graph_io::readUnweightedGraph(
         configuration::getConfig()->graph_filename, 
@@ -57,7 +68,7 @@ int main(int argn, char** argv) {
 
      while (S->next_edge(&edge_start, &edge_end)) {
 
-	std::cout << "streaming edge: (" << edge_start << ", " << edge_end << ")" << std::endl;
+	//std::cout << "streaming edge: (" << edge_start << ", " << edge_end << ")" << std::endl;
 
         samplers[edge_start]->stream_in(edge_end);
         samplers[edge_end]->stream_in(edge_start); 
@@ -67,6 +78,7 @@ int main(int argn, char** argv) {
 
 
     // print out the samples for testing purposes
+    /*
     std::cout << "SAMPLES:" << std::endl;
     for (uint64_t i = 0; i < nmbNodes; i++) {
         auto samples = samplers[i]->get_samples();
@@ -75,6 +87,7 @@ int main(int argn, char** argv) {
     	samples[0] << ", " << samples[1] << "]" << std::endl;
     }
     std::cout << std::endl;
+    */
 
     // enter node pairs into vector
     // (each edge is entered in both directions for compatibility with the
@@ -101,10 +114,13 @@ int main(int argn, char** argv) {
     }
 
     // TESTING
-    /*
-    std::cout << "MIN DEGREE NODE: " << min_deg_node << std::endl;
-    std::cout << "MIN DEGREE: " << d_min << std::endl << std::endl;
+    
+    if (seed == fracture_trials) {
+        std::cout << "MIN DEGREE NODE: " << min_deg_node << std::endl;
+        std::cout << "MIN DEGREE: " << d_min << std::endl << std::endl;
+    }
 
+    /*
     std::cout << "SAMPLED EDGES VEC (pre sorting):" << std::endl;
     for (std::pair<NodeID, NodeID> edge : sampled_edges_vec) {
 	std::cout << "(" << edge.first << ", " << edge.second << ")" << std::endl;
@@ -173,9 +189,7 @@ int main(int argn, char** argv) {
     }
 
     subsampled_graph->finish_construction();
-    subsampled_graph->computeDegrees();
-
-    std::cout << "checkpoint 1" << std::endl << std::endl;
+    subsampled_graph->computeDegrees(); 
 
     // find the connected components of the subsampled graph
     // (example: app/temporal_largest_cc.cpp:49)
@@ -183,22 +197,27 @@ int main(int argn, char** argv) {
     std::vector<int32_t> components(subsampled_graph->number_of_nodes());
     size_t component_count = scc.strong_components(subsampled_graph, &components);
 
+    /*
     std::cout << "CONNECTED COMPONENTS: " << std::endl;
     for (uint32_t i = 0; i < subsampled_graph->number_of_nodes(); i++) {
 	std::cout << "node " << i << " in component " << components[i] << std::endl;
     }
     std::cout << std::endl;
-
+    */
 
     // check that number of connected components is not too high
     if (component_count == 1) {
+	fracture_failure_tally++;
 	std::cout << "Failure: only one connected component!" << std::endl << std::endl;
     } else if (component_count > (100 * nmbNodes) / d_min) {
+	fracture_failure_tally++;
 	std::cout << "Failure: too many connected components!" << std::endl << std::endl;
+    } else {
+        fracture_success_tally++;
+	std::cout << "Success! Graph fractured into " << component_count << " components!" 
+	    << " (Below the max of " << (100 * nmbNodes) / d_min << ")"
+	    << std::endl << std::endl;
     }
-
-    std::cout << "checkpoint 2" << std::endl << std::endl;
-
     //second pass
     S->new_pass();
 
@@ -206,4 +225,8 @@ int main(int argn, char** argv) {
 
 
     // delete the samplers
+    }
+
+    std::cout << "OUT OF " << fracture_trials << " TRIALS, " << fracture_success_tally 
+	    << " SUCCESSES AND " << fracture_failure_tally << " FAILURES" << std::endl;
 }
