@@ -22,18 +22,16 @@ class graph_stream {
 
 public:
     graph_stream(NodeID nodeCount, EdgeID edgeCount, 
-                 NodeID *edge_start_array, NodeID *edge_end_array) { 
+                 std::pair<NodeID, NodeID> *edge_array) { 
         nmbPasses = 1;
         nmbNodes = nodeCount;
         nmbEdges = edgeCount;
-        edge_starts = edge_start_array;
-        edge_ends = edge_end_array;
+        edges = edge_array;
         edge_pointer = 0;
     }
 
     virtual ~graph_stream() {
-        delete [] edge_starts;
-        delete [] edge_ends;
+        delete [] edges;
     }
 
     /* ============================================================= */
@@ -50,8 +48,8 @@ public:
     void view_edge(NodeID *start, NodeID *end) {
         // should not ever be possible for the edge_pointer 
         // to leave the array
-        *start = edge_starts[edge_pointer - 1];
-        *end = edge_ends[edge_pointer - 1];
+        *start = edges[edge_pointer - 1].first;
+        *end = edges[edge_pointer - 1].second;
     }
 
     // move to the next edge in the stream
@@ -81,7 +79,6 @@ public:
     uint64_t nmbPasses;
     NodeID nmbNodes;
     EdgeID nmbEdges;
-    NodeID *edge_starts;
-    NodeID *edge_ends;
+    std::pair<NodeID, NodeID> *edges;
     EdgeID edge_pointer;
 };

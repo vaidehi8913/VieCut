@@ -71,10 +71,9 @@ public:
             std::cerr << "Weighted graphs not supported for streams." << std::endl;
             exit(4);
         }
+      
+	std::pair<NodeID, NodeID> *edges = new std::pair<NodeID, NodeID>[nmbEdges];
 
-        NodeID *edge_starts = new NodeID[nmbEdges];
-        NodeID *edge_ends = new NodeID[nmbEdges];
-        
         EdgeID edge_counter = 0;
         NodeID node_counter = 0;
 
@@ -110,9 +109,10 @@ public:
                 // only enter edges when the dest node > source node, 
                 // to avoid duplicates
                 if (node_counter < target - 1) {
-                    edge_starts[edge_counter] = node_counter;
-                    edge_ends[edge_counter] = target - 1;
-                    edge_counter++;
+                    //edge_starts[edge_counter] = node_counter;
+                    //edge_ends[edge_counter] = target - 1;
+                    edges[edge_counter] = std::make_pair(node_counter, target-1);
+		    edge_counter++;
                 }
             }
 
@@ -137,7 +137,13 @@ public:
         }
 
         if (scramble_array) {
-            // TO DO: scramble the array
+            for (unsigned i = 0; i < nmbEdges-1; i++) {
+		int swap_with = random_functions::nextInt(i + 1, nmbEdges - 1);
+
+		std::pair<NodeID, NodeID> temp = edges[i];
+		edges[i] = edges[swap_with];
+		edges[swap_with] = temp;
+	    }
         }
 
 
@@ -153,7 +159,7 @@ public:
 	*/
 
         graph_stream *S = new graph_stream((NodeID) nmbNodes, (EdgeID) nmbEdges,
-                                          edge_starts, edge_ends);
+                                          edges);
 
         return S;
 
