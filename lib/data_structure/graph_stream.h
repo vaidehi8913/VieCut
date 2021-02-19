@@ -42,6 +42,10 @@ public:
         return nmbNodes;
     }
 
+    EdgeID number_of_edges() {
+	return nmbEdges;
+    }
+
     // there must be a better way to return the edge info
     // see the edge without advancing the stream
     // note that this shows what would be the next edge, so to speak

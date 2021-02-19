@@ -24,13 +24,17 @@
 #include "tools/timer.h"
 #include "data_structure/union_find.h"
 
+uint64_t exponent(uint64_t base, uint64_t exp);
+uint64_t brute_force_mincut(NodeID nmbNodes, std::vector<std::pair<NodeID, NodeID>> edges);
+
+
 int main(int argn, char** argv) {
 
     tlx::CmdlineParser cmdl;
 
     auto cfg = configuration::getConfig();
     size_t fracture_trials = 1;
-    cfg->seed = 1;
+    cfg->seed = 0;
 
     cmdl.add_param_string("graph", cfg->graph_filename, "path to graph file");
 
@@ -43,19 +47,24 @@ int main(int argn, char** argv) {
     int fracture_one_component = 0;
     int fracture_too_many_components = 0;
 
+    NodeID nmbNodes = UNDEFINED_NODE;
+    EdgeID nmbEdges = UNDEFINED_EDGE;
+    NodeID d_min = UNDEFINED_NODE;
+    NodeID min_deg_node = UNDEFINED_NODE;
+
     //RUN IT OVER WITH DIFFERENT SEEDS
     for (size_t seed = 1; seed <= fracture_trials; seed++) {
 
-    std::cout << "seed: " << cfg->seed + seed;
+    std::cout << "seed: " << cfg->seed + seed << std::endl;
 
-    //random_functions::setSeed(cfg->seed);
     random_functions::setSeed(cfg->seed + seed);
 
     graph_stream *S = streaming_graph_io::readUnweightedGraph(
         configuration::getConfig()->graph_filename, 
 	true); // do we want to scramble the edges after we read them in?
 
-    NodeID nmbNodes = S->number_of_nodes();
+    nmbNodes = S->number_of_nodes();
+    nmbEdges = S->number_of_edges(); // only for comparison purposes
 
     edge_sampler **samplers = new edge_sampler*[nmbNodes];
 
@@ -70,34 +79,16 @@ int main(int argn, char** argv) {
     NodeID edge_end;
 
      while (S->next_edge(&edge_start, &edge_end)) {
-
-	//std::cout << "streaming edge: (" << edge_start << ", " << edge_end << ")" << std::endl;
-
         samplers[edge_start]->stream_in(edge_end);
         samplers[edge_end]->stream_in(edge_start); 
     }
-
-    std::cout << std::endl;
-
-
-    // print out the samples for testing purposes
-    /*
-    std::cout << "SAMPLES:" << std::endl;
-    for (uint64_t i = 0; i < nmbNodes; i++) {
-        auto samples = samplers[i]->get_samples();
-	//we know that there are two samples
-	std::cout << "node " << i << ": [" << 
-    	samples[0] << ", " << samples[1] << "]" << std::endl;
-    }
-    std::cout << std::endl;
-    */
 
     // enter node pairs into vector
     // (each edge is entered in both directions for compatibility with the
     //  graph format)
     std::vector<std::pair<NodeID, NodeID>> sampled_edges_vec;
-    NodeID d_min = nmbNodes;
-    NodeID min_deg_node = UNDEFINED_NODE;
+    d_min = nmbNodes;
+    min_deg_node = UNDEFINED_NODE;
 
     for (uint64_t i = 0; i < nmbNodes; i++) {
         uint64_t sample_count = samplers[i]->get_number_of_samples();
@@ -114,37 +105,20 @@ int main(int argn, char** argv) {
             d_min = i_deg;
             min_deg_node = i;
         }
+
+	// we never look at the sampler again after this
+	delete samplers[i];
     }
 
-    // TESTING
-    
-    if (seed == fracture_trials) {
-        std::cout << "MIN DEGREE NODE: " << min_deg_node << std::endl;
-        std::cout << "MIN DEGREE: " << d_min << std::endl;
-    }
-
-    /*
-    std::cout << "SAMPLED EDGES VEC (pre sorting):" << std::endl;
-    for (std::pair<NodeID, NodeID> edge : sampled_edges_vec) {
-	std::cout << "(" << edge.first << ", " << edge.second << ")" << std::endl;
-    }
-    */
+    delete [] samplers;
 
     std::sort(sampled_edges_vec.begin(), sampled_edges_vec.end(),
                 [](std::pair<NodeID, NodeID> e1, std::pair<NodeID, NodeID> e2) {
                     if (e1.first == e2.first) {
                         return e1.second < e2.second;
-                    }
-                    
+                    }                    
                     return e1.first < e2.first;
                 });
-
-    /*
-    std::cout << "SAMPLED EDGES VEC (post sort, pre duplicate removal):" << std::endl;
-    for (std::pair<NodeID, NodeID> edge : sampled_edges_vec) {
-	std::cout << "(" << edge.first << ", " << edge.second << ")" << std::endl;
-    }
-    */
 
     // throw out duplicates
     // (need to do this now so that we know the number of edges to 
@@ -159,13 +133,6 @@ int main(int argn, char** argv) {
             i++;
         }
     }
-
-    /*
-    std::cout << "SAMPLED EDGES VEC (post duplicate removal):" << std::endl;
-    for (std::pair<NodeID, NodeID> edge : sampled_edges_vec) {
-	std::cout << "(" << edge.first << ", " << edge.second << ")" << std::endl;
-    }
-    */
 
     int nmbSampledEdges = sampled_edges_vec.size();
 
@@ -201,13 +168,8 @@ int main(int argn, char** argv) {
     size_t subsampled_component_count = scc.strong_components(subsampled_graph, 
 		    					      &subsampled_components);
 
-    /*
-    std::cout << "CONNECTED COMPONENTS: " << std::endl;
-    for (uint32_t i = 0; i < subsampled_graph->number_of_nodes(); i++) {
-	std::cout << "node " << i << " in component " << components[i] << std::endl;
-    }
-    std::cout << std::endl;
-    */
+    // do shared pointers have to be explicitly deallocated?
+    //delete subsampled_graph;
 
     // check that number of connected components is not too high
     if (subsampled_component_count == 1) {
@@ -223,10 +185,9 @@ int main(int argn, char** argv) {
 	std::cout << "Success! Graph fractured into " 
 	    << subsampled_component_count << " components!" 
 	    << " (Below the max of " << (100 * nmbNodes) / d_min << ")"
-	    << std::endl << std::endl;
+	    << std::endl;
     }
 
-    std::cout << "Starting pass 2" << std::endl;
     //second pass
     S->new_pass();
 
@@ -245,24 +206,20 @@ int main(int argn, char** argv) {
     edge_start = UNDEFINED_NODE;
     edge_end = UNDEFINED_NODE;
 
+    std::vector<std::pair<NodeID, NodeID>> surviving_edges;
+
     // see an edge
     while(S->next_edge(&edge_start, &edge_end)) {
         // contract the edge into H
         NodeID contracted_edge_start = subsampled_components[edge_start];
 	NodeID contracted_edge_end = subsampled_components[edge_end];
 
-	//std::cout << "Reading (" << edge_start << ", " << edge_end << ") "
-	//	  << "as (" << contracted_edge_start << ", " << contracted_edge_end << ")";
-
 	if (contracted_edge_start == contracted_edge_end) {
 	    // this is a self-loop that should be ignored
-	//    std::cout << ": ignoring self-loop" << std::endl;
 	    continue;
 	}
-	
-	std::cout << "Reading (" << edge_start << ", " << edge_end << ") "
-		  << "as (" << contracted_edge_start << ", " << contracted_edge_end << ")";
 
+	surviving_edges.push_back(std::make_pair(contracted_edge_start, contracted_edge_end));
 
     	// iterate through the union find data structures to find the smallest 
     	// number that supports this edge
@@ -270,75 +227,120 @@ int main(int argn, char** argv) {
 	    unsigned start_component = Fs[i]->Find(contracted_edge_start);
 	    unsigned end_component = Fs[i]->Find(contracted_edge_end);
 
-	    //std::cout << "[ in F_" << i << " (" << start_component 
-	    //	    << ", " << end_component << ")]";
-
 	    if (start_component != end_component) {
 		// this is the minimum valid F
 		Fs[i]->Union(start_component, end_component);
 		F_edges.push_back(std::make_pair(contracted_edge_start, 
 					            contracted_edge_end));
-		std::cout << ": adding to F_" << i ;
+		F_edges.push_back(std::make_pair(contracted_edge_end, 
+						    contracted_edge_start));
 		break;
 	    }	    
 	}
-
-	std::cout << std::endl;
     } 
+
+    for (unsigned i = 0; i < d_min; i++) {
+	delete Fs[i];
+    }
+    delete [] Fs;
 
     std::sort(F_edges.begin(), F_edges.end(),
                [](std::pair<NodeID, NodeID> e1, std::pair<NodeID, NodeID> e2) {
                    if (e1.first == e2.first) {
                        return e1.second < e2.second;
                    }
-                    
                    return e1.first < e2.first;
                });
 
-    std::shared_ptr<graph_access> F_graph = std::make_shared<graph_access>();
-    
-    F_graph->start_construction(subsampled_component_count, F_edges.size());
+    // remove duplicates
+    // (assuming that the algorithm does not want us to create a multigraph)
+    i = 0;
 
-    // enter sampled edges into a graph
-    vec_last_src = UNDEFINED_NODE;
-    graph_last_src = UNDEFINED_NODE;
-
-    for (std::pair<NodeID, NodeID> e : F_edges) {
-        NodeID u = e.first;
-        NodeID v = e.second;
-
-        if (u != vec_last_src) {
-            graph_last_src = F_graph->new_node();
-            vec_last_src = u;
+    while(i + 1 < F_edges.size()) {
+        if (F_edges[i].second == F_edges[i+1].second 
+            && F_edges[i].first == F_edges[i+1].first) {
+                F_edges.erase(F_edges.begin() + i);
+        } else {
+            i++;
         }
+    }
+ 
+    uint64_t F_mincut = brute_force_mincut(subsampled_component_count, F_edges);
 
-        F_graph->new_edge(graph_last_src, v);
+    // calculate the size of this cut in the original graph for comparison purpose
+    uint64_t returned_cut_size = 0;
 
-	std::cout << "Adding edge (" << u << ", " << v << ") to F" << std::endl;
+    for (std::pair<NodeID, NodeID> e : surviving_edges) {
+	NodeID u = e.first;
+	NodeID v = e.second;
+
+	if ( ((F_mincut >> u) & 1) ^ ((F_mincut >> v) & 1) ) {
+	    returned_cut_size++;
+	}
     }
 
-    std::cout << "Checkpoint 3"<< std::endl;
+    std::cout << "Returning cut of size: " << returned_cut_size << std::endl << std::endl;
 
-    F_graph->finish_construction();
-
-    std::cout << "Checkpoint 4" << std::endl;
-
-    // why does this segfault?
-    //F_graph->computeDegrees(); 
-    //std::cout << "Checkpoint 5" << std::endl;
-
-    // use an existing mincut algorithm to find the mincut of the graph
-    
-    // calculate the size of this cut in the original graph for comparison purposes
-
-    // delete the samplers
+    delete S;
     }
 
     std::cout << std::endl << "---------------------------------------------" << std::endl
 	    << "SUMMARY" << std::endl
+	    << "Nodes: " << nmbNodes << ", Edges: " << nmbEdges << std::endl
+	    << "Min degree node: " << min_deg_node << ", of degree: " << d_min << std::endl
 	    << "Trials: " << fracture_trials << std::endl
 	    << "Successes: " << fracture_success << std::endl
 	    << "Failures (only one component): " << fracture_one_component << std::endl
 	    << "Failures (too many components): " << fracture_too_many_components << std::endl
 	    << "---------------------------------------------" << std::endl;
+}
+
+// this only works for graphs under 64 nodes!!!
+uint64_t brute_force_mincut(NodeID nmbNodes, std::vector<std::pair<NodeID, NodeID>> edges) {
+
+    uint64_t mincut = 0;
+    int mincut_value = exponent(nmbNodes, 2);
+
+    for (uint64_t cut = 1; cut < exponent(2, nmbNodes-1); cut++) {
+	
+	int cut_value = 0;
+
+	for (std::pair<NodeID, NodeID> e : edges) {
+	    NodeID u = e.first;
+	    NodeID v = e.second;
+
+	    if ( ((cut >> u) & 1) ^ ((cut >> v) & 1) ) {
+		cut_value++;
+	    }
+	}
+
+	if (cut_value < mincut_value) {
+	    mincut = cut;
+	    mincut_value = cut_value;
+	}
+    }
+
+    return mincut;
+}
+
+
+// this will easily overflow on large inputs
+uint64_t exponent(uint64_t base, uint64_t exp) {
+    
+    uint64_t working_exp = exp;
+    uint64_t result = 1;
+    uint64_t working_base = base;
+
+    while(working_exp > 0) {
+	uint64_t least_significant_digit = working_exp & 1; 
+        working_exp >>= 1;
+
+	if (least_significant_digit > 0) {
+	    result *= working_base;
+	}
+
+	working_base *= working_base;
+    }
+
+    return result;
 }
