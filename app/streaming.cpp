@@ -52,10 +52,13 @@ int main(int argn, char** argv) {
     NodeID d_min = UNDEFINED_NODE;
     NodeID min_deg_node = UNDEFINED_NODE;
 
+    std::cout << "seed, fractured_components, cut_size" << std::endl;
+
     //RUN IT OVER WITH DIFFERENT SEEDS
     for (size_t seed = 1; seed <= fracture_trials; seed++) {
 
-    std::cout << "seed: " << cfg->seed + seed << std::endl;
+    //std::cout << "seed: " << cfg->seed + seed << std::endl;
+    std::cout << cfg->seed + seed << ", ";
 
     random_functions::setSeed(cfg->seed + seed);
 
@@ -174,18 +177,21 @@ int main(int argn, char** argv) {
     // check that number of connected components is not too high
     if (subsampled_component_count == 1) {
 	fracture_one_component++;
-	std::cout << "Failure: only one connected component!" << std::endl << std::endl;
+	//std::cout << "Failure: only one connected component!" << std::endl << std::endl;
+	std::cout << 1 << ", xx" << std::endl;
 	continue; // At this point we have to give up
     } else if (subsampled_component_count > (100 * nmbNodes) / d_min) {
 	fracture_too_many_components++;
-	std::cout << "Failure: too many connected components!" << std::endl << std::endl;
+	//std::cout << "Failure: too many connected components!" << std::endl << std::endl;
+	std::cout << subsampled_component_count << ", xx" << std::endl;
 	continue; // At this point we have to give up
     } else {
         fracture_success++;
-	std::cout << "Success! Graph fractured into " 
+	/*std::cout << "Success! Graph fractured into " 
 	    << subsampled_component_count << " components!" 
 	    << " (Below the max of " << (100 * nmbNodes) / d_min << ")"
-	    << std::endl;
+	    << std::endl; */
+	std::cout << subsampled_component_count << ", ";
     }
 
     //second pass
@@ -279,7 +285,8 @@ int main(int argn, char** argv) {
 	}
     }
 
-    std::cout << "Returning cut of size: " << returned_cut_size << std::endl << std::endl;
+    //std::cout << "Returning cut of size: " << returned_cut_size << std::endl << std::endl;
+    std::cout << returned_cut_size << std::endl;
 
     delete S;
     }
@@ -288,6 +295,7 @@ int main(int argn, char** argv) {
 	    << "SUMMARY" << std::endl
 	    << "Nodes: " << nmbNodes << ", Edges: " << nmbEdges << std::endl
 	    << "Min degree node: " << min_deg_node << ", of degree: " << d_min << std::endl
+	    << "Max feasible component count: " << (100 * nmbNodes) / d_min << std::endl
 	    << "Trials: " << fracture_trials << std::endl
 	    << "Successes: " << fracture_success << std::endl
 	    << "Failures (only one component): " << fracture_one_component << std::endl
