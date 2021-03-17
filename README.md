@@ -191,7 +191,19 @@ The following command
 finds the multiterminal cut as given by the graph and partition file using 12 threads and all except for the high-connectivity kernelization (see \[HNS'19b] for further details) rules enabled.
 
 
+### 'streaming'
 
+This implements a streaming algorithm for unweighted mincut as presented by Assadi and Dudeja's 2021 paper "A Simple Semi-Streaming Algorithm for Global Minimum Cuts"
+
+#### Usage:
+
+```
+./build/streaming /path/to/graph.metis \[options]
+```
+
+#### (Optional) Program Options:
+- `-t` - number of trials to run
+- `-r` - seed for random number generator
 
 
 ## Other Executables
