@@ -1,8 +1,6 @@
 
 Forked by Vaidehi from the original VieCut Repo on Dec 11, 2020
 
-edit 2
-
 # VieCut 1.00 - Shared-memory Minimum Cuts
 
 [![Build Status](https://travis-ci.com/VieCut/VieCut.svg?branch=master)](https://travis-ci.com/VieCut/VieCut)
