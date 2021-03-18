@@ -18,8 +18,7 @@
 #include "algorithms/global_mincut/minimum_cut.h"
 #include "common/definitions.h"
 #include "data_structure/edge_sampler.h"
-#include "io/streaming_graph_io.h"
-#include "data_structure/graph_stream.h"
+#include "io/stream_from_file_io.h"
 #include "algorithms/misc/strongly_connected_components.h"
 #include "common/configuration.h"
 #include "tlx/cmdline_parser.hpp"
@@ -71,9 +70,12 @@ int main(int argn, char** argv) {
 
     random_functions::setSeed(cfg->seed + seed);
 
-    graph_stream *S = streaming_graph_io::readUnweightedGraph(
+    /*graph_stream *S = streaming_graph_io::readUnweightedGraph(
         configuration::getConfig()->graph_filename, 
 	true); // do we want to scramble the edges after we read them in?
+    */
+
+    stream_from_file_io *S = new stream_from_file_io(cfg->graph_filename);
 
     nmbNodes = S->number_of_nodes();
     nmbEdges = S->number_of_edges(); // only for comparison purposes
@@ -180,6 +182,8 @@ int main(int argn, char** argv) {
 
     // see an edge
     while(S->next_edge(&edge_start, &edge_end)) {
+	//std::cout << "reading edge streaming.cpp " << std::endl;
+
         // contract the edge into H
         NodeID contracted_edge_start = subsampled_components[edge_start];
 	NodeID contracted_edge_end = subsampled_components[edge_end];
@@ -245,6 +249,7 @@ int main(int argn, char** argv) {
     std::cout << t.elapsed() << std::endl;
 
     delete S;
+
     }
 
     std::cout << std::endl << "---------------------------------------------" << std::endl

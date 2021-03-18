@@ -1,5 +1,12 @@
 /* 
     Read metis format into a "stream"
+
+    This reads all of the edges into a graph_stream object
+
+Pro: this can scramble the edges for testing purposes
+
+Con: all of the edges are held in memory, which kind of defeats
+	the purpose of this algorithm
 */
 
 #pragma once
