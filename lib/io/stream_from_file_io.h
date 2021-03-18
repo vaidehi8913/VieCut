@@ -50,14 +50,8 @@ public:
 	    
 	bool inner_next_edge = read_next_edge(&inner_start, &inner_end);
 
-	//std::cout << "inner_start: " << inner_start 
-	//	<< ", inner_end: " << inner_end << std::endl;
-
 	*start = inner_start - 1;
 	*end = inner_end - 1;
-
-        //std::cout << "Streaming edge: (" << *start << ", " << *end << "), " 
-	//	<< inner_next_edge << std::endl;
 
 	return inner_next_edge;
     }
@@ -73,7 +67,6 @@ public:
 
 private:
     void open_file() {
-	//std::ifstream instream(file_name.c_str());
 	file_stream.open(file_name.c_str());
 
 	if (!file_stream) {
@@ -116,13 +109,9 @@ private:
 
 	// load the first line (node 1)
 	read_next_line();
-
-	//file_stream = instream;
     }
 
     bool read_next_edge (NodeID *start, NodeID *end) {
-
-	//std::cout << "read_next_edge" << std::endl;
 
         if (file_is_open) {
 	    if (line_ptr < line.size()) {
@@ -140,9 +129,6 @@ private:
 	        // only return edges with the dest node > source node
 	        // to avoid duplicates
 	        if (line_index < target) {
-		    //std::cout << "line_index: " << line_index 
-		    //	    << ", target: " << target << std::endl;
-
 		    *start = line_index;
 		    *end = target;
 		    return true;
@@ -166,8 +152,6 @@ private:
 
     void read_next_line() {
 
-	//std::cout << "read_next_line" << std::endl;
-	
 	if (std::getline(file_stream, line)) {
 	    
             if (line[0] == '%') {
@@ -203,8 +187,6 @@ private:
 	    ++(*line_ptr);
 	}
 	++(*line_ptr);
-
-	//std::cout << "fast_atoi: " << x << std::endl;
 
 	return x;
     }

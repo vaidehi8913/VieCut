@@ -70,11 +70,6 @@ int main(int argn, char** argv) {
 
     random_functions::setSeed(cfg->seed + seed);
 
-    /*graph_stream *S = streaming_graph_io::readUnweightedGraph(
-        configuration::getConfig()->graph_filename, 
-	true); // do we want to scramble the edges after we read them in?
-    */
-
     stream_from_file_io *S = new stream_from_file_io(cfg->graph_filename);
 
     nmbNodes = S->number_of_nodes();
