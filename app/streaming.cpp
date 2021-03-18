@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <time.h>
+#include <omp.h>
 
 #include <cstdint>
 #include <iostream>
@@ -13,6 +14,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "algorithms/global_mincut/algorithms.h"
+#include "algorithms/global_mincut/minimum_cut.h"
 #include "common/definitions.h"
 #include "data_structure/edge_sampler.h"
 #include "io/streaming_graph_io.h"
@@ -24,9 +27,9 @@
 #include "tools/timer.h"
 #include "data_structure/union_find.h"
 
+std::shared_ptr<graph_access> edge_vector_to_graph(NodeID nmbNodes, std::vector<std::pair<NodeID, NodeID>> edges);
 uint64_t exponent(uint64_t base, uint64_t exp);
 uint64_t brute_force_mincut(NodeID nmbNodes, std::vector<std::pair<NodeID, NodeID>> edges);
-
 
 int main(int argn, char** argv) {
 
@@ -42,6 +45,10 @@ int main(int argn, char** argv) {
     cmdl.add_size_t('t', "trials", fracture_trials, "number of trials");
 
     if (!cmdl.process(argn, argv)) return -1;
+
+    // use standard heuristic minimum cut for the last step
+    cfg->algorithm = "vc";
+    cfg->save_cut = true;
 
     int fracture_success = 0;
     int fracture_one_component = 0;
@@ -117,54 +124,8 @@ int main(int argn, char** argv) {
 
     delete [] samplers;
 
-    std::sort(sampled_edges_vec.begin(), sampled_edges_vec.end(),
-                [](std::pair<NodeID, NodeID> e1, std::pair<NodeID, NodeID> e2) {
-                    if (e1.first == e2.first) {
-                        return e1.second < e2.second;
-                    }                    
-                    return e1.first < e2.first;
-                });
-
-    // throw out duplicates
-    // (need to do this now so that we know the number of edges to 
-    // initialize the graph with)
-    uint64_t i = 0;
-
-    while(i + 1 < sampled_edges_vec.size()) {
-        if (sampled_edges_vec[i].second == sampled_edges_vec[i+1].second 
-            && sampled_edges_vec[i].first == sampled_edges_vec[i+1].first) {
-                sampled_edges_vec.erase(sampled_edges_vec.begin() + i);
-        } else {
-            i++;
-        }
-    }
-
-    int nmbSampledEdges = sampled_edges_vec.size();
-
-    // initialize graph
-    std::shared_ptr<graph_access> subsampled_graph = std::make_shared<graph_access>();
-    // need this to be a shared pointer to use strongly_connected_components.h
-    
-    subsampled_graph->start_construction(nmbNodes, nmbSampledEdges);
-
-    // enter sampled edges into a graph
-    NodeID vec_last_src = UNDEFINED_NODE;
-    NodeID graph_last_src = UNDEFINED_NODE;
-
-    for (std::pair<NodeID, NodeID> e : sampled_edges_vec) {
-        NodeID u = e.first;
-        NodeID v = e.second;
-
-        if (u != vec_last_src) {
-            graph_last_src = subsampled_graph->new_node();
-            vec_last_src = u;
-        }
-
-        subsampled_graph->new_edge(graph_last_src, v);
-    }
-
-    subsampled_graph->finish_construction();
-    subsampled_graph->computeDegrees(); 
+    std::shared_ptr<graph_access> subsampled_graph = 
+	    edge_vector_to_graph(nmbNodes, sampled_edges_vec);
 
     // find the connected components of the subsampled graph
     // (example: app/temporal_largest_cc.cpp:49)
@@ -253,37 +214,26 @@ int main(int argn, char** argv) {
     }
     delete [] Fs;
 
-    std::sort(F_edges.begin(), F_edges.end(),
-               [](std::pair<NodeID, NodeID> e1, std::pair<NodeID, NodeID> e2) {
-                   if (e1.first == e2.first) {
-                       return e1.second < e2.second;
-                   }
-                   return e1.first < e2.first;
-               });
+    std::shared_ptr<graph_access> F_graph = 
+	    edge_vector_to_graph(subsampled_component_count, F_edges);
 
-    // remove duplicates
-    // (assuming that the algorithm does not want us to create a multigraph)
-    i = 0;
+    // call standard non-parallel mincut on this
+    int numthread = 1;
+    
+    auto mc = selectMincutAlgorithm<std::shared_ptr<graph_access>>(cfg->algorithm);
+    omp_set_num_threads(numthread);
+    cfg->threads = numthread;
 
-    while(i + 1 < F_edges.size()) {
-        if (F_edges[i].second == F_edges[i+1].second 
-            && F_edges[i].first == F_edges[i+1].first) {
-                F_edges.erase(F_edges.begin() + i);
-        } else {
-            i++;
-        }
-    }
- 
-    uint64_t F_mincut = brute_force_mincut(subsampled_component_count, F_edges);
+    EdgeWeight cut;
+    cut = mc->perform_minimum_cut(F_graph);
 
-    // calculate the size of this cut in the original graph for comparison purpose
-    uint64_t returned_cut_size = 0;
+    unsigned returned_cut_size = 0;
 
-    for (std::pair<NodeID, NodeID> e : surviving_edges) {
+    for (std::pair<NodeID, NodeID> e: surviving_edges) {
 	NodeID u = e.first;
 	NodeID v = e.second;
 
-	if ( ((F_mincut >> u) & 1) ^ ((F_mincut >> v) & 1) ) {
+	if (F_graph->getNodeInCut(u) ^ F_graph->getNodeInCut(v)) {
 	    returned_cut_size++;
 	}
     }
@@ -308,6 +258,63 @@ int main(int argn, char** argv) {
 	    << "Failures (too many components): " << fracture_too_many_components << std::endl
 	    << "---------------------------------------------" << std::endl;
 }
+
+
+// beware: this mutates the edges vector
+std::shared_ptr<graph_access> edge_vector_to_graph(NodeID nmbNodes, std::vector<std::pair<NodeID, NodeID>> edges) {
+
+    std::sort(edges.begin(), edges.end(),
+                [](std::pair<NodeID, NodeID> e1, std::pair<NodeID, NodeID> e2) {
+                    if (e1.first == e2.first) {
+                        return e1.second < e2.second;
+                    }                    
+                    return e1.first < e2.first;
+                });
+
+    // throw out duplicates
+    // (need to do this now so that we know the number of edges to 
+    // initialize the graph with)
+    uint64_t i = 0;
+
+    while(i + 1 < edges.size()) {
+        if (edges[i].second == edges[i+1].second 
+            && edges[i].first == edges[i+1].first) {
+                edges.erase(edges.begin() + i);
+        } else {
+            i++;
+        }
+    }
+
+    int nmbEdges = edges.size();
+
+    // initialize graph
+    std::shared_ptr<graph_access> graph = std::make_shared<graph_access>();
+    // need this to be a shared pointer to use strongly_connected_components.h
+    
+    graph->start_construction(nmbNodes, nmbEdges);
+
+    // enter sampled edges into a graph
+    NodeID vec_last_src = UNDEFINED_NODE;
+    NodeID graph_last_src = UNDEFINED_NODE;
+
+    for (std::pair<NodeID, NodeID> e : edges) {
+        NodeID u = e.first;
+        NodeID v = e.second;
+
+        if (u != vec_last_src) {
+            graph_last_src = graph->new_node();
+            vec_last_src = u;
+        }
+
+        graph->new_edge(graph_last_src, v);
+    }
+
+    graph->finish_construction();
+    graph->computeDegrees(); 
+
+    return graph;
+}
+
 
 // this only works for graphs under 64 nodes!!!
 uint64_t brute_force_mincut(NodeID nmbNodes, std::vector<std::pair<NodeID, NodeID>> edges) {
