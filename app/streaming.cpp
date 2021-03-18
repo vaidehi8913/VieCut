@@ -52,12 +52,14 @@ int main(int argn, char** argv) {
     NodeID d_min = UNDEFINED_NODE;
     NodeID min_deg_node = UNDEFINED_NODE;
 
-    std::cout << "seed, fractured_components, cut_size" << std::endl;
+    std::cout << "seed, fractured_components, cut_size, elapsed_time" << std::endl;
 
     //RUN IT OVER WITH DIFFERENT SEEDS
     for (size_t seed = 1; seed <= fracture_trials; seed++) {
 
-    //std::cout << "seed: " << cfg->seed + seed << std::endl;
+    timer t;
+
+    // print seed;
     std::cout << cfg->seed + seed << ", ";
 
     random_functions::setSeed(cfg->seed + seed);
@@ -175,6 +177,7 @@ int main(int argn, char** argv) {
     //delete subsampled_graph;
 
     // check that number of connected components is not too high
+    // print fractured_components
     if (subsampled_component_count == 1) {
 	fracture_one_component++;
 	//std::cout << "Failure: only one connected component!" << std::endl << std::endl;
@@ -285,8 +288,11 @@ int main(int argn, char** argv) {
 	}
     }
 
-    //std::cout << "Returning cut of size: " << returned_cut_size << std::endl << std::endl;
-    std::cout << returned_cut_size << std::endl;
+    // print cut_size
+    std::cout << returned_cut_size << ", ";
+
+    // print elapsed_time
+    std::cout << t.elapsed() << std::endl;
 
     delete S;
     }
