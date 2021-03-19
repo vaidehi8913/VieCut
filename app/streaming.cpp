@@ -38,12 +38,14 @@ int main(int argn, char** argv) {
     size_t fracture_trials = 1;
     cfg->seed = 0;
     bool output_to_file = false;
+    size_t lambda = 0;
 
     cmdl.add_param_string("graph", cfg->graph_filename, "path to graph file");
     cmdl.add_size_t('r', "seed", cfg->seed, "random seed");
     cmdl.add_size_t('t', "trials", fracture_trials, "number of trials");
     cmdl.add_bool('s', "save", output_to_file, "should save output to file");
     cmdl.add_string('o', "output", cfg->output_path, "path to output file");
+    cmdl.add_size_t('l', "lambda", lambda, "size of min cut in graph");
 
     if (!cmdl.process(argn, argv)) return -1;
 
@@ -54,6 +56,7 @@ int main(int argn, char** argv) {
     int fracture_success = 0;
     int fracture_one_component = 0;
     int fracture_too_many_components = 0;
+    int acheived_min_cut = 0;
 
     NodeID nmbNodes = UNDEFINED_NODE;
     EdgeID nmbEdges = UNDEFINED_EDGE;
@@ -275,6 +278,10 @@ int main(int argn, char** argv) {
 		<< t.elapsed() << std::endl;
     }
 
+    if (returned_cut_size == lambda) {
+	acheived_min_cut++;
+    }
+
     delete S;
 
     }
@@ -289,6 +296,8 @@ int main(int argn, char** argv) {
 	    << "Successes: " << fracture_success << std::endl
 	    << "Failures (only one component): " << fracture_one_component << std::endl
 	    << "Failures (too many components): " << fracture_too_many_components << std::endl
+	    << "Lambda (as given in input): " << lambda << std::endl
+	    << "Trials achieving mincut of lambda: " << acheived_min_cut << std::endl
 	    << "---------------------------------------------" << std::endl;
 
     if (output_to_file) {
@@ -303,6 +312,8 @@ int main(int argn, char** argv) {
 	    << "Successes: " << fracture_success << std::endl
 	    << "Failures (only one component): " << fracture_one_component << std::endl
 	    << "Failures (too many components): " << fracture_too_many_components << std::endl
+	    << "Lambda (as given in input): " << lambda << std::endl
+	    << "Trials achieving mincut of lambda: " << acheived_min_cut << std::endl
 	    << "---------------------------------------------" << std::endl;
 
 	output_stream.close();
