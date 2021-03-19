@@ -37,11 +37,13 @@ int main(int argn, char** argv) {
     auto cfg = configuration::getConfig();
     size_t fracture_trials = 1;
     cfg->seed = 0;
+    bool output_to_file = false;
 
     cmdl.add_param_string("graph", cfg->graph_filename, "path to graph file");
-
     cmdl.add_size_t('r', "seed", cfg->seed, "random seed");
     cmdl.add_size_t('t', "trials", fracture_trials, "number of trials");
+    cmdl.add_bool('s', "save", output_to_file, "should save output to file");
+    cmdl.add_string('o', "output", cfg->output_path, "path to output file");
 
     if (!cmdl.process(argn, argv)) return -1;
 
@@ -60,6 +62,14 @@ int main(int argn, char** argv) {
 
     std::cout << "seed, fractured_components, cut_size, elapsed_time" << std::endl;
 
+    std::ofstream output_stream;
+
+    if (output_to_file) {
+	output_stream.open(cfg->output_path.c_str());
+
+	output_stream << "seed, fractured_components, cut_size, elapsed_time" << std::endl;
+    }
+
     //RUN IT OVER WITH DIFFERENT SEEDS
     for (size_t seed = 1; seed <= fracture_trials; seed++) {
 
@@ -67,6 +77,10 @@ int main(int argn, char** argv) {
 
     // print seed;
     std::cout << cfg->seed + seed << ", ";
+
+    if (output_to_file) {
+	output_stream << cfg->seed + seed << ", ";
+    }
 
     random_functions::setSeed(cfg->seed + seed);
 
@@ -140,11 +154,20 @@ int main(int argn, char** argv) {
 	fracture_one_component++;
 	//std::cout << "Failure: only one connected component!" << std::endl << std::endl;
 	std::cout << 1 << ", xx" << std::endl;
+
+	if (output_to_file) {
+	    output_stream << 1 << ", xx" << std::endl;
+	}
 	continue; // At this point we have to give up
     } else if (subsampled_component_count > (100 * nmbNodes) / d_min) {
 	fracture_too_many_components++;
 	//std::cout << "Failure: too many connected components!" << std::endl << std::endl;
 	std::cout << subsampled_component_count << ", xx" << std::endl;
+
+	if (output_to_file) {
+	    output_stream << subsampled_component_count << ", xx" << std::endl;
+	}
+
 	continue; // At this point we have to give up
     } else {
         fracture_success++;
@@ -153,6 +176,11 @@ int main(int argn, char** argv) {
 	    << " (Below the max of " << (100 * nmbNodes) / d_min << ")"
 	    << std::endl; */
 	std::cout << subsampled_component_count << ", ";
+
+	if (output_to_file) {
+	    output_stream << subsampled_component_count << ", ";
+	}
+
     }
 
     //second pass
@@ -177,7 +205,6 @@ int main(int argn, char** argv) {
 
     // see an edge
     while(S->next_edge(&edge_start, &edge_end)) {
-	//std::cout << "reading edge streaming.cpp " << std::endl;
 
         // contract the edge into H
         NodeID contracted_edge_start = subsampled_components[edge_start];
@@ -243,6 +270,11 @@ int main(int argn, char** argv) {
     // print elapsed_time
     std::cout << t.elapsed() << std::endl;
 
+    if (output_to_file) {
+	output_stream << returned_cut_size << ", "
+		<< t.elapsed() << std::endl;
+    }
+
     delete S;
 
     }
@@ -258,6 +290,23 @@ int main(int argn, char** argv) {
 	    << "Failures (only one component): " << fracture_one_component << std::endl
 	    << "Failures (too many components): " << fracture_too_many_components << std::endl
 	    << "---------------------------------------------" << std::endl;
+
+    if (output_to_file) {
+
+    output_stream << std::endl << "---------------------------------------------" << std::endl
+	    << "SUMMARY" << std::endl
+	    << "Graph: " << cfg->graph_filename << std::endl
+	    << "Nodes: " << nmbNodes << ", Edges: " << nmbEdges << std::endl
+	    << "Min degree node: " << min_deg_node << ", of degree: " << d_min << std::endl
+	    << "Max feasible component count: " << (100 * nmbNodes) / d_min << std::endl
+	    << "Trials: " << fracture_trials << std::endl
+	    << "Successes: " << fracture_success << std::endl
+	    << "Failures (only one component): " << fracture_one_component << std::endl
+	    << "Failures (too many components): " << fracture_too_many_components << std::endl
+	    << "---------------------------------------------" << std::endl;
+
+	output_stream.close();
+    }
 }
 
 
