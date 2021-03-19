@@ -249,6 +249,7 @@ int main(int argn, char** argv) {
 
     std::cout << std::endl << "---------------------------------------------" << std::endl
 	    << "SUMMARY" << std::endl
+	    << "Graph: " << cfg->graph_filename << std::endl
 	    << "Nodes: " << nmbNodes << ", Edges: " << nmbEdges << std::endl
 	    << "Min degree node: " << min_deg_node << ", of degree: " << d_min << std::endl
 	    << "Max feasible component count: " << (100 * nmbNodes) / d_min << std::endl
