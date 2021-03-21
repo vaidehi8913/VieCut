@@ -201,7 +201,10 @@ This implements a streaming algorithm for unweighted mincut as presented by Assa
 #### (Optional) Program Options:
 - `-t` - number of trials to run
 - `-r` - seed for random number generator
-
+- `-l` - lambda: the size of the minimum cut (not necessary, just useful for tallying results
+- `-s` - save to an output file (needs to be used with -o)
+- `-o` - path to save output 
+- `-S` - number of edges sampled per vertex (Default is 2)
 
 ## Other Executables
 
