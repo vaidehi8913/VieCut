@@ -156,19 +156,19 @@ int main(int argn, char** argv) {
     if (subsampled_component_count == 1) {
 	fracture_one_component++;
 	//std::cout << "Failure: only one connected component!" << std::endl << std::endl;
-	std::cout << 1 << ", xx" << std::endl;
+	std::cout << 1 << ", xx, " << t.elapsed() << std::endl;
 
 	if (output_to_file) {
-	    output_stream << 1 << ", xx" << std::endl;
+	    output_stream << 1 << ", xx, " << t.elapsed() << std::endl;
 	}
 	continue; // At this point we have to give up
     } else if (subsampled_component_count > (100 * nmbNodes) / d_min) {
 	fracture_too_many_components++;
 	//std::cout << "Failure: too many connected components!" << std::endl << std::endl;
-	std::cout << subsampled_component_count << ", xx" << std::endl;
+	std::cout << subsampled_component_count << ", xx, " << t.elapsed() << std::endl;
 
 	if (output_to_file) {
-	    output_stream << subsampled_component_count << ", xx" << std::endl;
+	    output_stream << subsampled_component_count << ", xx, " << t.elapsed() << std::endl;
 	}
 
 	continue; // At this point we have to give up
