@@ -1,0 +1,1 @@
+seed, fractured_components, cut_size, elapsed_time
