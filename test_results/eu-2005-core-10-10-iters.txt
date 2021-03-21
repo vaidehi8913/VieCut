@@ -1,0 +1,25 @@
+seed, fractured_components, cut_size, elapsed_time
+1, 107, 1, 84.1966
+2, 100, 12, 84.6733
+3, 101, 10, 84.655
+4, 109, 1, 83.1021
+5, 101, 1, 83.8312
+6, 92, 1, 83.8644
+7, 102, 1, 84.6498
+8, 108, 10, 84.1802
+9, 91, 1, 84.8564
+10, 103, 1, 84.289
+
+---------------------------------------------
+SUMMARY
+Graph: /data/noea45cs/huge_mincut/bench/eu-2005.graph_core_10
+Nodes: 605264, Edges: 7575339
+Min degree node: 0, of degree: 10
+Max feasible component count: 6052640
+Trials: 10
+Successes: 10
+Failures (only one component): 0
+Failures (too many components): 0
+Lambda (as given in input): 1
+Trials achieving mincut of lambda: 7
+---------------------------------------------
