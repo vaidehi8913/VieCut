@@ -39,6 +39,7 @@ int main(int argn, char** argv) {
     cfg->seed = 0;
     bool output_to_file = false;
     size_t lambda = 0;
+    size_t samples_per_vertex = 2;
 
     cmdl.add_param_string("graph", cfg->graph_filename, "path to graph file");
     cmdl.add_size_t('r', "seed", cfg->seed, "random seed");
@@ -46,6 +47,8 @@ int main(int argn, char** argv) {
     cmdl.add_bool('s', "save", output_to_file, "should save output to file");
     cmdl.add_string('o', "output", cfg->output_path, "path to output file");
     cmdl.add_size_t('l', "lambda", lambda, "size of min cut in graph");
+    cmdl.add_size_t('S', "samples", samples_per_vertex, "number of edges to be sampled per vertex");
+
 
     if (!cmdl.process(argn, argv)) return -1;
 
@@ -97,7 +100,7 @@ int main(int argn, char** argv) {
     // initialize the samplers
     for (uint64_t i = 0; i < nmbNodes; i++) {
         // each sampler takes two samples
-        samplers[i] = new edge_sampler((NodeID) i, 2);
+        samplers[i] = new edge_sampler((NodeID) i, samples_per_vertex);
     }
 
     //stream one pass of edges into samplers
