@@ -123,7 +123,7 @@ Run any minimum cut algorithm using the following command
 ./build/mincut_parallel [options] /path/to/graph.metis <algorithm>
 ```
 
-For \<algorithm\> use one of the following:
+For `<algorithm>` use one of the following:
 
 - `vc` - `VieCut` \[HNSS'18]
 - `noi` - Algorithm of Nagamochi et al. \[NOI'94]

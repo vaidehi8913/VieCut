@@ -1,0 +1,11 @@
+io time: 0.013895
+RESULT algo=inexactpardefault graph=4elts.metis time=0.0498431 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.0158339 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.015569 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.015784 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.015749 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.0157609 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.0157549 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.0157039 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.015238 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=4elts.metis time=0.0150158 cut=3 n=15606 m=45878 processes=1 edge_select=heavy_vertex seed=0
