@@ -1,0 +1,11 @@
+io time: 0.494634
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.138523 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.137119 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.136688 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.136768 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.137093 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.134593 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.134449 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.134434 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.13449 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=eu-2005.graph_core_60 time=0.134301 cut=29 n=58829 m=3683785 processes=1 edge_select=heavy_vertex seed=0

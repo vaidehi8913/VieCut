@@ -1,0 +1,11 @@
+io time: 2.11783
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.854175 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.943967 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=2.38363 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.833217 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.822058 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.8079 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.807548 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.823796 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.807903 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=inexactpardefault graph=eu-2005.graph_core_10 time=0.80718 cut=1 n=605264 m=15150679 processes=1 edge_select=heavy_vertex seed=0

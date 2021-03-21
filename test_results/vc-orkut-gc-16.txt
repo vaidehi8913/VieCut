@@ -1,0 +1,11 @@
+io time: 31.5135
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=29.0255 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=28.641 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=30.1576 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=29.4884 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=39.7657 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=29.2713 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=26.5386 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=32.5449 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=33.5505 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0
+RESULT algo=vcdefault graph=com-orkut.metis_core_16 time=32.3142 cut=14 n=2427486 m=112151730 processes=1 edge_select=heavy_vertex seed=0

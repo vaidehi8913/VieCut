@@ -1,0 +1,25 @@
+seed, fractured_components, cut_size, elapsed_time
+1, 17970, 87, 148.134
+2, 18400, 80, 150.954
+3, 18149, 71, 144.515
+4, 18037, 68, 142.59
+5, 18170, 14, 146.433
+6, 18053, 613, 151.811
+7, 17797, 87, 147.817
+8, 18226, 49, 146.645
+9, 18085, 101, 142.422
+10, 18096, 79, 146.673
+
+---------------------------------------------
+SUMMARY
+Graph: /data/noea45cs/huge_mincut/bench/com-orkut.metis_core_16
+Nodes: 2427486, Edges: 56075865
+Min degree node: 0, of degree: 16
+Max feasible component count: 15171787
+Trials: 10
+Successes: 10
+Failures (only one component): 0
+Failures (too many components): 0
+Lambda (as given in input): 14
+Trials achieving mincut of lambda: 1
+---------------------------------------------
